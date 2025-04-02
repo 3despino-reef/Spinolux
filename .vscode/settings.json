@@ -1,0 +1,22 @@
+{
+  "cmake.sourceDirectory": "C:/Users/Alberto/Desktop/ARCHIVOS/ESP32_PANTALLAMARINO - copia (2)/lib/Adafruit-GFX",
+  "files.associations": {
+    "optional": "cpp",
+    "istream": "cpp",
+    "ostream": "cpp",
+    "system_error": "cpp",
+    "array": "cpp",
+    "functional": "cpp",
+    "tuple": "cpp",
+    "type_traits": "cpp",
+    "utility": "cpp",
+    "cstddef": "cpp",
+    "deque": "cpp",
+    "string": "cpp",
+    "unordered_map": "cpp",
+    "unordered_set": "cpp",
+    "vector": "cpp",
+    "string_view": "cpp",
+    "initializer_list": "cpp"
+  }
+}
