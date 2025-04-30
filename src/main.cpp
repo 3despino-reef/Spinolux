@@ -38,6 +38,8 @@ int       errorsSTemp       = 0;
 OneWire oneWire(ONE_WIRE_BUS_PIN);  // Usar el pin del sensor de temperatura
 //Le pasamos la instancia oneWire a DallasTemperature 
 DallasTemperature sensors(&oneWire);
+// Ventilador (opcional)
+FanController fan(FAN_PIN, TEMP_ON_FAN, TEMP_OFF_FAN); // pin, encender >35°C, apagar <30°C
 
 
 //  VARIABLE LUZ
@@ -346,6 +348,7 @@ void loop() {
   LEDPowerManegerWrapper();
   printStatus();
   updateLEDStatus(alarmSTemp, alarmReadingSTemp, wifiState, systemInTime);
+  fan.updateFan(readingSTemp, alarmSTemp, alarmReadingSTemp);;
   // Solo actualizar la pantalla si el menú NO está activo
   // Solo actualizar la pantalla si el menú NO está activo
   if (!isMenuActive()) {
