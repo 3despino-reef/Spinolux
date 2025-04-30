@@ -12,6 +12,9 @@
 
 // Variables relacionadas con la temperatura
 #define TEMP_MAX              44  // Temperatura máxima para activar la alarma
+#define TEMP_ON_FAN           35  // Temperatura a la que se enciende el ventilador 
+#define TEMP_OFF_FAN          32  // Temperatura a la que se apaga el ventilador. 
+//Importante dejar diferencia entre temperatura de encendido y apagado del ventilador para evitar encendidos y apagados conntinuos 
 
 
 // Variables relacionadas con la luz
