@@ -22,6 +22,7 @@ VERSION:08/08/2024
 #include <DisplayManager.h>
 #include <MenuManager.h>
 #include <LEDManager.h>
+#include <FanManager.h>
 
 
 
