@@ -29,8 +29,6 @@ extern boolean     moonMode;
 extern Preferences preferences;
 extern String      alarmSTemp;
 extern String      alarmReadingSTemp;
-extern byte        numberShortClicks;
-extern byte        numberLongClicks;
 
 // Variables globales del menú
 bool menuActive          = false;
@@ -46,7 +44,7 @@ boolean editing          = false;
 
 // Variables de interacción del botón
 unsigned long lastInteractionTime = 0;
-const unsigned long menuTimeout = 15000;  // 15 segundos de inactividad
+const unsigned long menuTimeout = 20000;  // 20 segundos de inactividad
 byte lastnumberShortClicks = 0;  // Guarda el último número de pulsaciones cortas
 
 // Inicia el pulsador para controlar el menú
@@ -61,28 +59,33 @@ bool isMenuActive() {
 
 //  Maneja la lógica de navegación del menú según los clics del botón
 void processMenuNavigation() {
-    checkButton();
-    // Obtener los clics 
-    numberShortClicks = getShortClicksCount();
-    numberLongClicks = getLongClicksCount();
+    checkButton(); // Actualiza los clics mediante EasyButton
+
+    // Obtener el estado actual de clics de forma consistente
+    int shortClicks = getShortClicksCount();
+    int longClicks = getLongClicksCount();
 
     // Si el número de clics cortos ha cambiado, reiniciar el tiempo de inactividad
-    if (numberShortClicks != lastnumberShortClicks) {
+    if (shortClicks != lastnumberShortClicks) {
         lastInteractionTime = millis();
-        lastnumberShortClicks = numberShortClicks;  // Actualizar el registro del último clic corto
+        lastnumberShortClicks = shortClicks;
     }
 
-    if (numberLongClicks != 0 && !menuActive) {
+    // Si pulsación larga y no estamos en el menú → activamos menú
+    if (longClicks > 0 && !menuActive) {
         menuActive = true;
         menuState = MAIN_MENU;
         lastInteractionTime = millis();
         editing = false;
-        resetClicks(); // Reiniciar conteo de clics
+
+        resetClicks(); // limpiamos para evitar heredar clics
+        return; // importante: evitamos procesar clicks residuales y entrar a menuActive sin haber vuelto a leer los clicks
     }
 
+    // Si ya estamos en el menú, procesamos con los valores actuales
     if (menuActive) {
-        handleMenu(numberShortClicks, numberLongClicks);
-        checkMenuTimeout(); // Verificar si hay inactividad
+        handleMenu(shortClicks, longClicks);
+        checkMenuTimeout();
     }
 }
 
@@ -99,15 +102,15 @@ void checkMenuTimeout() {
 // Manejo de la navegación del menú
 void handleMenu(byte numberShortClicks, byte numberLongClicks) {
     switch (menuState) {
-        case MAIN_MENU: handleMainMenu(numberShortClicks, numberLongClicks); break;
-        case MODE_MENU: handleModeMenu(numberShortClicks, numberLongClicks); break;
-        case POWER_MENU: handlePowerMenu(numberShortClicks, numberLongClicks); break;
-        case POWER_ADJUST: handlePowerAdjust(numberShortClicks, numberLongClicks); break;
-        case SUNRISE_MENU: handleSunriseAdjust(numberShortClicks, numberLongClicks); break;
-        case SUNDOWN_MENU:  handleSundownAdjust(numberShortClicks, numberLongClicks); break;
-        case SUNRISE_RAMP_ADJUST: handleSunriseRampAdjust(numberShortClicks, numberLongClicks); break; 
-        case SUNDOWN_RAMP_ADJUST: handleSundownRampAdjust(numberShortClicks, numberLongClicks); break;
-        case MOON_MENU: handleMoonMode(numberShortClicks, numberLongClicks); break;
+        case MAIN_MENU: handleMainMenu(getShortClicksCount(), getLongClicksCount()); break;
+        case MODE_MENU: handleModeMenu(getShortClicksCount(), getLongClicksCount()); break;
+        case POWER_MENU: handlePowerMenu(getShortClicksCount(), getLongClicksCount()); break;
+        case POWER_ADJUST: handlePowerAdjust(getShortClicksCount(), getLongClicksCount()); break;
+        case SUNRISE_MENU: handleSunriseAdjust(getShortClicksCount(), getLongClicksCount()); break;
+        case SUNDOWN_MENU:  handleSundownAdjust(getShortClicksCount(), getLongClicksCount()); break;
+        case SUNRISE_RAMP_ADJUST: handleSunriseRampAdjust(getShortClicksCount(), getLongClicksCount()); break; 
+        case SUNDOWN_RAMP_ADJUST: handleSundownRampAdjust(getShortClicksCount(), getLongClicksCount()); break;
+        case MOON_MENU: handleMoonMode(getShortClicksCount(), getLongClicksCount()); break;
     }
 }
 
@@ -133,8 +136,9 @@ void handleMainMenu(byte numberShortClicks, byte numberLongClicks) {
             case 7: menuState = SUNDOWN_RAMP_ADJUST; break; 
         }
         resetClicks();
+        return; // Salimos para no seguir usando los clics ya reseteados
     }
-    if (numberShortClicks >= 9) resetShortClicks();
+    if (numberShortClicks >= numberOptions) resetShortClicks();
 }
 
 // Manejo del menú de modo de luz
@@ -142,9 +146,9 @@ void handleModeMenu(byte numberShortClicks, byte numberLongClicks) {
     String options [] = {"On", "Auto", "Cycle", "Off", "Salir"};
     byte numberOptions = sizeof(options) / sizeof(options[0]); // Calculamos el tamaño ANTES
     showMenuCarrusel(options, numberOptions, numberShortClicks);
-    preferences.begin("datos", false);
 
     if (numberLongClicks == 1) {
+        preferences.begin("datos", false);
         switch (numberShortClicks) {
             case 0: 
                 lightMode = "on"; 
@@ -167,9 +171,10 @@ void handleModeMenu(byte numberShortClicks, byte numberLongClicks) {
         resetClicks();
         showMessageSave();
         menuActive = false; // Cerrar menú
+        return; // Evitamos seguir usando clicks ya reseteados
     }
 
-    if (numberShortClicks >= 5) resetShortClicks();
+    if (numberShortClicks >= numberOptions) resetShortClicks();
 }
 
 // Manejo del menú de selección de potencia
@@ -183,8 +188,9 @@ void handlePowerMenu(byte numberShortClicks, byte numberLongClicks) {
             menuState = POWER_ADJUST;
         }
         resetClicks();
+        return; // Evitamos seguir usando clicks ya reseteados
     }
-    if (numberShortClicks >= 5) resetShortClicks();
+    if (numberShortClicks >= numberOptions) resetShortClicks();
 }
 
 // Manejo del ajuste de potencia
@@ -207,6 +213,7 @@ void handlePowerAdjust(byte numberShortClicks, byte numberLongClicks) {
         showMessageSave();
         menuActive = false; // Cerrar menú
         resetClicks();
+        return; // Evitamos seguir usando clicks ya reseteados
     }
 }
 
@@ -229,7 +236,11 @@ void handleSunriseAdjust(byte numberShortClicks, byte numberLongClicks) {
             editing=true;
             resetClicks();
         }
-        if (numberShortClicks >=4) resetShortClicks();
+        if (numberShortClicks >=4) {
+            resetShortClicks();
+            // nos volvemos a traer los valores de conteo de clicks ya reseteados
+            numberShortClicks = getShortClicksCount();
+        }
             
     } 
     //si hemos seleccionado un campo:
@@ -238,7 +249,7 @@ void handleSunriseAdjust(byte numberShortClicks, byte numberLongClicks) {
             case 0: 
                 //estamos editando las horas
                 //la hora de encendido será la guardada actualmente + el número de clicks 
-                selectedHour = hourSunrise + numberShortClicks;
+                selectedHour = selectedHour + numberShortClicks;
                 if (selectedHour >=24) hourSunrise = 0;
                 if (numberLongClicks == 1) {
                     //hemos hecho una pulsación larga y salimos de la edición
@@ -249,7 +260,7 @@ void handleSunriseAdjust(byte numberShortClicks, byte numberLongClicks) {
             case 1: 
                 //estamos editando los minutos. Vamos de 5 en 5
                 //el minuto de encendido será el guardado actualmente + el número de clicks 
-                selectedMinute = minuteSunrise + numberShortClicks*5;
+                selectedMinute = selectedMinute + numberShortClicks*5;
                 if (selectedMinute >=60) selectedMinute = 0;
                 if (numberLongClicks == 1) {
                     //hemos hecho una pulsación larga y salimos de la edición
@@ -261,8 +272,9 @@ void handleSunriseAdjust(byte numberShortClicks, byte numberLongClicks) {
                 preferences.begin("datos", false);
                 preferences.putInt("hourSunrise", selectedHour); 
                 preferences.putInt("minuteSunrise", selectedMinute);
-                hourSunrise = selectedHour;
                 preferences.end();
+                hourSunrise = selectedHour;
+                minuteSunrise = selectedMinute;
                 resetClicks();
                 menuActive = false; //salimos del menu
                 firstEntry = true;
@@ -297,7 +309,11 @@ void handleSundownAdjust(byte numberShortClicks, byte numberLongClicks) {
             editing = true;
             resetClicks();
         }
-        if (numberShortClicks >= 4) resetShortClicks();
+        if (numberShortClicks >= 4){
+            // nos volvemos a traer los valores de conteo de clicks ya reseteados
+            numberShortClicks = getShortClicksCount();
+            resetShortClicks();
+        } 
     } 
     // Si hemos seleccionado un campo:
     else {
@@ -305,7 +321,7 @@ void handleSundownAdjust(byte numberShortClicks, byte numberLongClicks) {
             case 0: 
                 // Editando las horas
                 // La hora de apagado será la guardada actualmente + el número de clicks 
-                selectedHour = hourSundown + numberShortClicks;
+                selectedHour = selectedHour + numberShortClicks;
                 if (selectedHour >= 24) selectedHour = 0;
                 if (numberLongClicks == 1) {
                     // Pulsación larga: salimos de la edición
@@ -316,7 +332,7 @@ void handleSundownAdjust(byte numberShortClicks, byte numberLongClicks) {
             case 1: 
                 // Editando los minutos. Vamos de 5 en 5
                 // El minuto de apagado será el guardado actualmente + el número de clicks 
-                selectedMinute = minuteSundown + numberShortClicks * 5;
+                selectedMinute = selectedMinute + numberShortClicks * 5;
                 if (selectedMinute >= 60) selectedMinute = 0;
                 if (numberLongClicks == 1) {
                     // Pulsación larga: salimos de la edición
@@ -328,9 +344,9 @@ void handleSundownAdjust(byte numberShortClicks, byte numberLongClicks) {
                 preferences.begin("datos", false);
                 preferences.putInt("hourSundown", selectedHour); 
                 preferences.putInt("minuteSundown", selectedMinute);
+                preferences.end();
                 hourSundown = selectedHour;
                 minuteSundown = selectedMinute;
-                preferences.end();
                 resetClicks();
                 firstEntry = true;
                 menuActive = false; // Salimos del menú
@@ -446,8 +462,9 @@ void handleMoonMode(byte numberShortClicks, byte numberLongClicks) {
         showMessageSave();
         menuActive = false;
         resetClicks();
+        return; // Evitamos seguir usando clicks ya reseteados
     }
-    if (numberShortClicks >= 3) resetShortClicks();
+    if (numberShortClicks >= numberOptions) resetShortClicks();
 }
 
 

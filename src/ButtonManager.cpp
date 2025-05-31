@@ -8,7 +8,7 @@ byte numberLongClicks = 0;
 byte numberShortClicks = 0;
 extern String alarmSTemp;
 extern String alarmReadingSTemp;
-extern String lightMode; // auto, cycle, on
+extern String feederMode; // auto, cycle, on
 
 void setupButton (){
   button.begin();
@@ -18,10 +18,13 @@ void setupButton (){
 void onPressed() {
 // se ejecuta cada vez que hacemos una pulsación corta
   numberShortClicks++;
+  if (numberShortClicks > 254) resetShortClicks(); // prevenimos acumulación para no desbordar byte
 }
 void onPressedForDuration() {
 // se ejecuta cada vez que hacemos una pulsación larga
   numberLongClicks++;
+  if (numberLongClicks > 254) resetLongClicks(); // prevenimos acumulación para no desbordar byte
+  
 
 }
 
@@ -41,6 +44,7 @@ void resetLongClicks() {
 void resetClicks() {
   numberLongClicks = 0;
   numberShortClicks = 0;
+  vTaskDelay(1000 / portTICK_PERIOD_MS); //paramos la tarea para evitar que al cambiar de pantalla, se detecte un nuevo click
 }
 
 int getShortClicksCount() {
