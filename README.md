@@ -57,4 +57,4 @@ Proyecto de una **pantalla LED casera** para acuarios marinos, completamente mod
 
 1. **Clona el repositorio**:
    ```bash
-   git clone https://github.com/tuusuario/pantalla-led-acuario.git
+   git clone https://github.com/3despino-reef/Spinolux)
