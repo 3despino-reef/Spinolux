@@ -2,7 +2,8 @@
 
 Proyecto de una **pantalla LED casera** para acuarios marinos, completamente modular por canales, económica y controlada con ESP32. Diseñada para reproducir ciclos naturales de luz (amanecer, anochecer, luna) con múltiples canales configurables, sensores de temperatura, protección térmica y conectividad WiFi.
 
-🎥 **[Ver el proyecto en YouTube]([https://www.youtube.com/watch?v=YcooHASoYPQ](https://youtu.be/zrBU30r789M?si=7NmbrzLssdlGKISV))**
+
+🎥 **[Ver el proyecto en YouTube](https://youtu.be/zrBU30r789M?si=7NmbrzLssdlGKISV)**
 
 ---
 
