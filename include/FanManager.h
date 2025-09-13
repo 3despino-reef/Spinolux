@@ -3,7 +3,7 @@
 
 #include <Arduino.h>
 
-class FanController {
+class FanManager {
   private:
     int fanPin;
     float tempOnThreshold;
@@ -11,7 +11,7 @@ class FanController {
     bool fanState;
 
   public:
-    FanController(int pin, float onThreshold, float offThreshold);
+    FanManager(int pin, float onThreshold, float offThreshold);
     void updateFan(float temperature, String alarmTemp, String alarmSensor);
     bool isFanOn() const;
 };

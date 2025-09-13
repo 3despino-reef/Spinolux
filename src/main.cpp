@@ -40,7 +40,7 @@ OneWire oneWire(ONE_WIRE_BUS_PIN);  // Usar el pin del sensor de temperatura
 //Le pasamos la instancia oneWire a DallasTemperature 
 DallasTemperature sensors(&oneWire);
 // Ventilador (opcional)
-FanController fan(FAN_PIN, TEMP_ON_FAN, TEMP_OFF_FAN); // pin, encender >35°C, apagar <30°C
+FanManager fan(FAN_PIN, TEMP_ON_FAN, TEMP_OFF_FAN); // pin, encender >35°C, apagar <30°C
 
 
 //  VARIABLE LUZ
